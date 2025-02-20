@@ -1,11 +1,3 @@
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Covlonty Character",
-    Text = "Hello! My name's Ughuhh09... On Roblox, but if this script doesn't work, that's not my fault! Thank you for cooperating. (Made by Ughuhh09 {Kayden})",
-    Duration = 3,
-    Button1 = "Okay, I don't give a fuck",
-    Button2 = "Eugh... THIS GUY STINKS 🦨",
-})
-
 -- Remove existing tools from the player's backpack
 task.wait(1)
 for _, obj in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
@@ -15,18 +7,18 @@ for _, obj in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
 end
 
 -- Create Mapo Tel Tool
-local tool = Instance.new("Tool")
-tool.Name = "Mapo Tel"
-tool.RequiresHandle = false
-tool.Parent = game.Players.LocalPlayer.Backpack
-tool.TextureId = "rbxassetid://101984471215603"  -- Tool icon using the decal ID
+local mapoTelTool = Instance.new("Tool")
+mapoTelTool.Name = "Mapo Tel"
+mapoTelTool.RequiresHandle = false
+mapoTelTool.Parent = game.Players.LocalPlayer.Backpack
+mapoTelTool.TextureId = "rbxassetid://101984471215603"  -- Tool icon using the decal ID
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
--- Play Teleport Sound
+-- Play Teleport Sound for both abilities
 local function playTeleportSound()
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://619406046"
@@ -36,7 +28,7 @@ local function playTeleportSound()
     game:GetService("Debris"):AddItem(sound, 1)
 end
 
--- **Ability 1: Mapo Tel (Teleport Forward or to Player)**
+-- Mapo Tel Ability (Teleport based on Movement or Closest Player)
 local function mapoTel()
     local moveDirection = humanoid.MoveDirection
     local teleportDistance = 15  -- Set the teleport distance to 15 studs
@@ -69,17 +61,27 @@ local function mapoTel()
     playTeleportSound()
 end
 
--- **Ability 2: Tasn (Teleport to Trashcan, Perform one Left-Click, Return)**
+mapoTelTool.Activated:Connect(mapoTel)
+
+
+-- Create Tasn Tool
+local tasnTool = Instance.new("Tool")
+tasnTool.Name = "Tasn"
+tasnTool.RequiresHandle = false
+tasnTool.Parent = game.Players.LocalPlayer.Backpack
+tasnTool.TextureId = "rbxassetid://101984471215603"  -- Tool icon using the decal ID
+
+-- Predefined trashcan positions
+local trashcanPositions = {
+    Vector3.new(0.05725383758544922, 440.50567626953125, 53.435123443603516),
+    Vector3.new(123.11996459960938, 440.505859375, 183.40464782714844),
+    Vector3.new(171.1833435058594, 440.505859375, 159.72816467285156),
+}
+
+-- Tasn Ability (Teleport to Trashcan, Perform Left-Click, and Return)
 local function tasn()
     -- Store the original position before teleporting
     local originalPosition = humanoidRootPart.Position
-
-    -- Predefined trashcan positions
-    local trashcanPositions = {
-        Vector3.new(0.05725383758544922, 440.50567626953125, 53.435123443603516),
-        Vector3.new(123.11996459960938, 440.505859375, 183.40464782714844),
-        Vector3.new(171.1833435058594, 440.505859375, 159.72816467285156),
-    }
 
     -- Pick a random trashcan position
     local randomPosition = trashcanPositions[math.random(1, #trashcanPositions)]
@@ -92,9 +94,9 @@ local function tasn()
     humanoidRootPart.CFrame = CFrame.new(randomPosition)
     playTeleportSound()
 
-    -- Simulate left mouse click (M1) after teleport
+    -- Simulate left-click (M1)
     local virtualUser = game:GetService("VirtualUser")
-    virtualUser:Button1Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+    virtualUser:Button1Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)  -- Left-click action after teleport
 
     -- Wait for a moment before teleporting back
     task.wait(1)
@@ -106,11 +108,4 @@ local function tasn()
     camera.CFrame = cameraCFrame
 end
 
--- **Activate Abilities on Left-Click (M1)**
-
-tool.Activated:Connect(function()
-    -- Call either mapoTel or tasn directly based on the desired ability
-    -- This needs to match the ability activation you want
-    tasn()  -- Tasn Ability: Teleport, perform left-click, return
-    -- If you want to use Mapo Tel instead, replace 'tasn()' with 'mapoTel()'
-end)
+tasnTool.Activated:Connect(tasn)
