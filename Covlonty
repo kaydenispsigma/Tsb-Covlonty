@@ -68,9 +68,10 @@ print("Tasn Tool Created") -- Debugging
 
 -- Predefined trashcan positions
 local trashcanPositions = {
-	Vector3.new(0.057, 440.506, 53.435),
-	Vector3.new(123.12, 440.506, 183.405),
-	Vector3.new(171.183, 440.506, 159.728),
+        Vector3.new(4.62967586517334, 440.5057373046875, 60.54078674316406),
+        Vector3.new(69.82223510742188, 440.5058288574219, -78.09501647949219),
+        Vector3.new(124.11994171142578, 440.50567626953125, -100.90341186523438),
+        Vector3.new(178.38943481445312, 440.5058288574219, 157.46755981445312)
 }
 
 local function tasnAbility()
@@ -91,3 +92,4 @@ local function tasnAbility()
 end
 
 tasnTool.Activated:Connect(tasnAbility)
+
