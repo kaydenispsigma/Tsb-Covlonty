@@ -14,6 +14,7 @@ for _, obj in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
     end
 end
 
+-- Create Mapo Tel Tool
 local tool = Instance.new("Tool")
 tool.Name = "Mapo Tel"
 tool.RequiresHandle = false
@@ -25,7 +26,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
--- Create afterimage effect
+-- Create Afterimage Effect
 local function createAfterimage(position)
     local afterimage = Instance.new("Part")
     afterimage.Size = Vector3.new(2, 3, 2)
@@ -41,7 +42,7 @@ local function createAfterimage(position)
     game:GetService("Debris"):AddItem(afterimage, 0.4)
 end
 
--- Create teleport particle effect
+-- Create Teleport Particle Effect
 local function createTeleportParticles(position)
     local attachment = Instance.new("Attachment")
     attachment.Parent = humanoidRootPart
@@ -56,7 +57,7 @@ local function createTeleportParticles(position)
     game:GetService("Debris"):AddItem(attachment, 0.5)
 end
 
--- Play teleportation sound
+-- Play Teleport Sound
 local function playTeleportSound()
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://619406046"
@@ -66,10 +67,10 @@ local function playTeleportSound()
     game:GetService("Debris"):AddItem(sound, 1)
 end
 
--- Function to perform teleportation
+-- Function to Perform Teleportation (Mapo Tel)
 local function mapoTel()
     local moveDirection = humanoid.MoveDirection
-    local teleportDistance = 5
+    local teleportDistance = 15  -- Set the teleport distance to 15 studs
 
     -- If the player is moving, teleport in the direction they're moving
     if moveDirection.Magnitude > 0 then
@@ -102,3 +103,58 @@ local function mapoTel()
 end
 
 tool.Activated:Connect(mapoTel)
+
+-- Tasn Ability (Teleport to Random Trashcan, Left Mouse Click, and Return)
+local function tasn()
+    -- Store the original position before teleporting
+    local originalPosition = humanoidRootPart.Position
+
+    -- Find a random trashcan in the workspace
+    local trashcans = {}
+    for _, obj in pairs(workspace:GetChildren()) do
+        if obj:IsA("Model") and obj.Name == "Trashcan" then  -- Ensure the model is named "Trashcan"
+            table.insert(trashcans, obj)
+        end
+    end
+
+    -- If there are trashcans, teleport to one and interact with it
+    if #trashcans > 0 then
+        local randomTrashcan = trashcans[math.random(1, #trashcans)]  -- Pick a random trashcan
+        local trashcanPosition = randomTrashcan.PrimaryPart.Position
+
+        -- Save the current camera position before teleporting (to keep it in place)
+        local camera = game.Workspace.CurrentCamera
+        local cameraCFrame = camera.CFrame
+
+        -- Teleport to the trashcan
+        humanoidRootPart.CFrame = CFrame.new(trashcanPosition)
+
+        -- Simulate Left Mouse Click (M1) on the trashcan
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        mouse.Button1Down:Fire()
+
+        -- Wait for a moment to simulate the "pick up" action
+        task.wait(1)
+
+        -- Teleport back to the original position
+        humanoidRootPart.CFrame = CFrame.new(originalPosition)
+
+        -- Restore camera position
+        camera.CFrame = cameraCFrame
+
+        -- Play interaction effects
+        createAfterimage(humanoidRootPart.Position)
+        createTeleportParticles(humanoidRootPart.Position)
+        playTeleportSound()
+    else
+        -- If no trashcans were found, notify the player
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "No Trashcans Found",
+            Text = "No trashcans were found to interact with.",
+            Duration = 3,
+            Button1 = "Okay",
+        })
+    end
+end
+
+tool.Activated:Connect(tasn)
