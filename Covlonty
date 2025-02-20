@@ -1,113 +1,79 @@
--- ✅ Show Notification First
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "Covlonty Character",
     Text = "Hello! My name's Ughuhh09... On Roblox, but if this script doesn't work, that's not my fault! Thank you for cooperating. (Made by Ughuhh09 {Kayden})",
     Duration = 3,
-    Button1 = "Okay, I don't give a f***",
+    Button1 = "Okay, I don't give a fuck",
     Button2 = "Eugh... THIS GUY STINKS 🦨",
 })
 
--- ✅ Delete All Tools in the Workspace Next
-task.wait(1) -- Short delay so notification appears first
+task.wait(1)
 for _, obj in pairs(workspace:GetChildren()) do
     if obj:IsA("Tool") then
         obj:Destroy()
     end
 end
 
--- ✅ Now Run "Mapo Tel" Teleport Ability
+local tool = Instance.new("Tool")
+tool.Name = "Mapo Tel"
+tool.RequiresHandle = false
+tool.Parent = game.Players.LocalPlayer.Backpack
+tool.TextureId = "rbxassetid://101984471215603"  -- Tool icon using the decal ID
+
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
--- Function to find the nearest enemy
-local function getNearestEnemy()
-    local closestEnemy = nil
-    local shortestDistance = math.huge
-
-    for _, p in pairs(game.Players:GetPlayers()) do
-        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local distance = (humanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
-            if distance < shortestDistance then
-                shortestDistance = distance
-                closestEnemy = p
-            end
-        end
-    end
-
-    return closestEnemy
-end
-
--- Function to create an anime-style afterimage
 local function createAfterimage(position)
     local afterimage = Instance.new("Part")
     afterimage.Size = Vector3.new(2, 3, 2)
     afterimage.Material = Enum.Material.Neon
-    afterimage.Color = Color3.fromRGB(255, 255, 255) -- White glow
+    afterimage.Color = Color3.fromRGB(255, 255, 255)
     afterimage.Position = position
     afterimage.Anchored = true
     afterimage.CanCollide = false
     afterimage.Transparency = 0.3
     afterimage.Parent = workspace
 
-    -- Tween (fade out effect)
     game:GetService("TweenService"):Create(afterimage, TweenInfo.new(0.4), {Transparency = 1}):Play()
     game:GetService("Debris"):AddItem(afterimage, 0.4)
 end
 
--- Function to play teleport sound
+local function createTeleportParticles(position)
+    local attachment = Instance.new("Attachment")
+    attachment.Parent = humanoidRootPart
+    local particles = Instance.new("ParticleEmitter")
+    particles.Texture = "rbxassetid://101984471215603"  -- Particle texture using the same decal ID
+    particles.Rate = 50
+    particles.Lifetime = NumberRange.new(0.3)
+    particles.Speed = NumberRange.new(5, 10)
+    particles.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 0)})
+    particles.Parent = attachment
+
+    game:GetService("Debris"):AddItem(attachment, 0.5)
+end
+
 local function playTeleportSound()
     local sound = Instance.new("Sound")
-    sound.SoundId = "rbxassetid://619406046" -- Whoosh Sound Effect
+    sound.SoundId = "rbxassetid://619406046"
     sound.Volume = 2
     sound.Parent = humanoidRootPart
     sound:Play()
     game:GetService("Debris"):AddItem(sound, 1)
 end
 
--- Teleport function (Mapo Tel)
 local function mapoTel()
     local moveDirection = humanoid.MoveDirection
-    local teleportDistance = 5 -- Studs
+    local teleportDistance = 5
 
-    -- Create Afterimage at current position
     createAfterimage(humanoidRootPart.Position)
+    createTeleportParticles(humanoidRootPart.Position)
 
     if moveDirection.Magnitude > 0 then
-        -- Teleport forward if moving
-        local newPosition = humanoidRootPart.Position + (moveDirection.Unit * teleportDistance)
-        humanoidRootPart.Position = newPosition
-    else
-        -- Teleport to the nearest enemy if idle
-        local targetEnemy = getNearestEnemy()
-        if targetEnemy and targetEnemy.Character then
-            local targetPosition = targetEnemy.Character.HumanoidRootPart.Position
-            humanoidRootPart.Position = targetPosition + Vector3.new(0, 2, 0) -- Slightly above the target
-        end
+        humanoidRootPart.Position = humanoidRootPart.Position + (moveDirection.Unit * teleportDistance)
     end
 
-    -- Play teleport sound
     playTeleportSound()
-
-    -- Teleportation VFX (Purple Flash)
-    local effect = Instance.new("Part")
-    effect.Size = Vector3.new(3, 3, 3)
-    effect.Shape = Enum.PartType.Ball
-    effect.Material = Enum.Material.Neon
-    effect.Color = Color3.fromRGB(150, 0, 255) -- Purple color
-    effect.Position = humanoidRootPart.Position
-    effect.Anchored = true
-    effect.CanCollide = false
-    effect.Parent = workspace
-
-    -- Tween (fade out effect)
-    game:GetService("TweenService"):Create(effect, TweenInfo.new(0.3), {Transparency = 1}):Play()
-    game:GetService("Debris"):AddItem(effect, 0.3)
 end
 
--- Constantly activate the teleport move
-while true do
-    mapoTel()
-    task.wait(0.25) -- Adjust teleportation speed (Lower = Faster)
-end
+tool.Activated:Connect(mapoTel)
