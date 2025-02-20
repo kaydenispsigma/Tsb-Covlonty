@@ -19,6 +19,7 @@ local Invisible = false
 local speedBoost = 50
 local skyHeight = 5000  -- How high the player gets teleported
 local originalWalkSpeed = humanoid.WalkSpeed  -- Store the original walk speed
+local undergroundOffset = Vector3.new(0, -5, 0)  -- The offset to push the player underground
 
 -- Function to clone the character and make it invisible
 local function cloneAndInvis()
@@ -55,6 +56,8 @@ local function toggleInvisibility()
                 part.Transparency = 0  -- Set body part transparency to 0 (visible)
             end
         end
+        -- Move player back to the original position (above ground)
+        humanoidRootPart.CFrame = humanoidRootPart.CFrame + Vector3.new(0, 5, 0)
         print("You are now visible again.") -- Debugging
     else
         -- Activate invisibility
@@ -68,7 +71,9 @@ local function toggleInvisibility()
                 part.Transparency = 1  -- Set body part transparency to 1 (invisible)
             end
         end
-        print("You are now invisible.") -- Debugging
+        -- Move the player underground with the offset
+        humanoidRootPart.CFrame = humanoidRootPart.CFrame + undergroundOffset
+        print("You are now invisible and underground.") -- Debugging
 
         -- Clone and make the player invisible
         cloneAndInvis()
