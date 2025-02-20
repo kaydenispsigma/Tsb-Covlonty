@@ -17,31 +17,8 @@ local camera = game.Workspace.CurrentCamera
 -- Variables
 local Invisible = false
 local speedBoost = 50
-local skyHeight = 5000  -- How high the player gets teleported
 local originalWalkSpeed = humanoid.WalkSpeed  -- Store the original walk speed
 local undergroundOffset = Vector3.new(0, -5, 0)  -- The offset to push the player underground
-
--- Function to clone the character and make it invisible
-local function cloneAndInvis()
-    -- Clone the character
-    local characterClone = character:Clone()
-    characterClone.Parent = workspace  -- Place the clone in the workspace
-
-    -- Position the clone slightly above the original character
-    characterClone:SetPrimaryPartCFrame(humanoidRootPart.CFrame * CFrame.new(0, 5, 0))
-
-    -- Make the clone invisible by changing the transparency of all parts
-    for _, part in pairs(characterClone:GetChildren()) do
-        if part:IsA("BasePart") then
-            part.Transparency = 1  -- Set part transparency to 1 (invisible)
-            part.CanCollide = false  -- Prevent the clone from colliding with anything
-        end
-    end
-
-    -- Optional: Remove the clone after 5 seconds
-    wait(5)
-    characterClone:Destroy()
-end
 
 -- Function to toggle invisibility
 local function toggleInvisibility()
@@ -74,9 +51,6 @@ local function toggleInvisibility()
         -- Move the player underground with the offset
         humanoidRootPart.CFrame = humanoidRootPart.CFrame + undergroundOffset
         print("You are now invisible and underground.") -- Debugging
-
-        -- Clone and make the player invisible
-        cloneAndInvis()
     end
 end
 
@@ -148,7 +122,13 @@ local function tasnAbility()
     -- Teleport to trashcan
     humanoidRootPart.CFrame = CFrame.new(randomPosition)
 
-    task.wait(1) -- Stay at trashcan for 1 second
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "M1"
+    Text = "PUNCH NOW LEFT CLICK NOW"
+    Duration = 1
+})
+
+    task.wait(2) -- Stay at trashcan for 1 second
 
     -- Teleport back
     humanoidRootPart.CFrame = CFrame.new(originalPosition)
