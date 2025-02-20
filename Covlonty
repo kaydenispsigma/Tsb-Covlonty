@@ -15,18 +15,25 @@ for _, obj in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
 end
 
 -- Create Mapo Tel Tool
-local tool = Instance.new("Tool")
-tool.Name = "Mapo Tel"
-tool.RequiresHandle = false
-tool.Parent = game.Players.LocalPlayer.Backpack
-tool.TextureId = "rbxassetid://101984471215603"  -- Tool icon using the decal ID
+local mapoTelTool = Instance.new("Tool")
+mapoTelTool.Name = "Mapo Tel"
+mapoTelTool.RequiresHandle = false
+mapoTelTool.Parent = game.Players.LocalPlayer.Backpack
+mapoTelTool.TextureId = "rbxassetid://101984471215603"  -- Tool icon using the decal ID for Mapo Tel
+
+-- Create Tasn Tool
+local tasnTool = Instance.new("Tool")
+tasnTool.Name = "Tasn"
+tasnTool.RequiresHandle = false
+tasnTool.Parent = game.Players.LocalPlayer.Backpack
+tasnTool.TextureId = "rbxassetid://101984471215603"  -- Tool icon using the decal ID for Tasn
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
--- Create Afterimage Effect
+-- Function to create afterimage effect
 local function createAfterimage(position)
     local afterimage = Instance.new("Part")
     afterimage.Size = Vector3.new(2, 3, 2)
@@ -42,7 +49,7 @@ local function createAfterimage(position)
     game:GetService("Debris"):AddItem(afterimage, 0.4)
 end
 
--- Create Teleport Particle Effect
+-- Function to create teleport particle effect
 local function createTeleportParticles(position)
     local attachment = Instance.new("Attachment")
     attachment.Parent = humanoidRootPart
@@ -57,7 +64,7 @@ local function createTeleportParticles(position)
     game:GetService("Debris"):AddItem(attachment, 0.5)
 end
 
--- Play Teleport Sound
+-- Function to play teleport sound
 local function playTeleportSound()
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://619406046"
@@ -67,69 +74,38 @@ local function playTeleportSound()
     game:GetService("Debris"):AddItem(sound, 1)
 end
 
--- Function to Perform Teleportation (Mapo Tel)
+-- Function to Mapo Tel (Teleport based on movement direction)
 local function mapoTel()
     local moveDirection = humanoid.MoveDirection
-    local teleportDistance = 15  -- Set the teleport distance to 15 studs
+    local teleportDistance = 15
 
-    -- If the player is moving, teleport in the direction they're moving
-    if moveDirection.Magnitude > 0 then
-        humanoidRootPart.CFrame = CFrame.new(humanoidRootPart.Position + moveDirection.Unit * teleportDistance)
-    else
-        -- If the player isn't moving, teleport to the closest player
-        local closestPlayer = nil
-        local closestDistance = math.huge
-
-        for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-            if otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local distance = (humanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).Magnitude
-                if distance < closestDistance then
-                    closestDistance = distance
-                    closestPlayer = otherPlayer
-                end
-            end
-        end
-
-        -- Teleport to the closest player if found
-        if closestPlayer then
-            humanoidRootPart.CFrame = CFrame.new(closestPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0))
-        end
-    end
-
-    -- Create effects and sound
     createAfterimage(humanoidRootPart.Position)
     createTeleportParticles(humanoidRootPart.Position)
+
+    if moveDirection.Magnitude > 0 then
+        humanoidRootPart.CFrame = humanoidRootPart.CFrame + (moveDirection.Unit * teleportDistance)
+    end
+
     playTeleportSound()
 end
 
-tool.Activated:Connect(mapoTel)
-
--- Tasn Ability (Teleport to Random Trashcan, Left Mouse Click, and Return)
+-- Function to find Trashcan and interact with it (Tasn)
 local function tasn()
     -- Store the original position before teleporting
     local originalPosition = humanoidRootPart.Position
 
-    -- Find a random trashcan in the workspace
-    local trashcans = {}
-    for _, obj in pairs(workspace:GetChildren()) do
-        if obj:IsA("Model") and obj.Name == "Trashcan" then  -- Ensure the model is named "Trashcan"
-            table.insert(trashcans, obj)
-        end
-    end
+    -- Find the Trashcan in the workspace (assuming there's only one named "Trashcan")
+    local trashcan = workspace:FindFirstChild("Trashcan")
 
-    -- If there are trashcans, teleport to one and interact with it
-    if #trashcans > 0 then
-        local randomTrashcan = trashcans[math.random(1, #trashcans)]  -- Pick a random trashcan
-        local trashcanPosition = randomTrashcan.PrimaryPart.Position
-
+    if trashcan then
         -- Save the current camera position before teleporting (to keep it in place)
         local camera = game.Workspace.CurrentCamera
         local cameraCFrame = camera.CFrame
 
-        -- Teleport to the trashcan
-        humanoidRootPart.CFrame = CFrame.new(trashcanPosition)
+        -- Teleport to the Trashcan
+        humanoidRootPart.CFrame = CFrame.new(trashcan.Position)
 
-        -- Simulate Left Mouse Click (M1) on the trashcan
+        -- Simulate Left Mouse Click (M1) on the Trashcan
         local mouse = game.Players.LocalPlayer:GetMouse()
         mouse.Button1Down:Fire()
 
@@ -147,14 +123,18 @@ local function tasn()
         createTeleportParticles(humanoidRootPart.Position)
         playTeleportSound()
     else
-        -- If no trashcans were found, notify the player
+        -- If Trashcan isn't found, notify the player
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "No Trashcans Found",
-            Text = "No trashcans were found to interact with.",
+            Title = "No Trashcan Found",
+            Text = "No Trashcan was found to interact with.",
             Duration = 3,
             Button1 = "Okay",
         })
     end
 end
 
-tool.Activated:Connect(tasn)
+-- Bind Mapo Tel ability to the Mapo Tel tool's activation
+mapoTelTool.Activated:Connect(mapoTel)
+
+-- Bind Tasn ability to the Tasn tool's activation
+tasnTool.Activated:Connect(tasn)
