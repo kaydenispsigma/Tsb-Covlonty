@@ -14,6 +14,12 @@ local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 local camera = game.Workspace.CurrentCamera
 
+for _, obj in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+    if obj:IsA("Tool") then
+        obj:Destroy()
+    end
+end
+
 -- Variables
 local Invisible = false
 local speedBoost = 50
