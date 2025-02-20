@@ -36,7 +36,7 @@ local function playTeleportSound()
     game:GetService("Debris"):AddItem(sound, 1)
 end
 
--- Function to Perform Teleportation (Mapo Tel)
+-- **Ability 1: Mapo Tel (Teleport Forward or to Player)**
 local function mapoTel()
     local moveDirection = humanoid.MoveDirection
     local teleportDistance = 15  -- Set the teleport distance to 15 studs
@@ -69,9 +69,7 @@ local function mapoTel()
     playTeleportSound()
 end
 
-tool.Activated:Connect(mapoTel)
-
--- Tasn Ability (Teleport to Random Trashcan and Return)
+-- **Ability 2: Tasn (Teleport to Trashcan, Perform one Left-Click, Return)**
 local function tasn()
     -- Store the original position before teleporting
     local originalPosition = humanoidRootPart.Position
@@ -92,8 +90,9 @@ local function tasn()
 
     -- Teleport to the trashcan
     humanoidRootPart.CFrame = CFrame.new(randomPosition)
+    playTeleportSound()
 
-    -- Simulate left mouse click (fires an input event)
+    -- Simulate left mouse click (M1) after teleport
     local virtualUser = game:GetService("VirtualUser")
     virtualUser:Button1Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
 
@@ -107,4 +106,11 @@ local function tasn()
     camera.CFrame = cameraCFrame
 end
 
-tool.Activated:Connect(tasn)
+-- **Activate Abilities on Left-Click (M1)**
+
+tool.Activated:Connect(function()
+    -- Call either mapoTel or tasn directly based on the desired ability
+    -- This needs to match the ability activation you want
+    tasn()  -- Tasn Ability: Teleport, perform left-click, return
+    -- If you want to use Mapo Tel instead, replace 'tasn()' with 'mapoTel()'
+end)
