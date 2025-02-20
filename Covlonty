@@ -1,8 +1,8 @@
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "Covlonty Character",
     Text = "Hello! My names Ughuhh09... On Roblox, but this script might not work that'll not be my fault! Thank you for cooperating (Made By Ughuhh09{Kayden})",
-    Duration = 3
-    Button1 = "Honestly... I couldn't give a fuck"
+    Duration = 3,
+    Button1 = "Honestly... I couldn't give a fuck",
     Button2 = "Eugh... THIS GUY STINKS🦨"
 })
 
