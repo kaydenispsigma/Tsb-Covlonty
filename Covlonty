@@ -1,3 +1,11 @@
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "Covlonty Character",
+    Text = "Hello! My names Ughuhh09... On Roblox, but this script might not work that'll not be my fault! Thank you for cooperating (Made By Ughuhh09{Kayden})",
+    Duration = 3
+    Button1 = "Honestly... I couldn't give a fuck"
+    Button2 = "Eugh... THIS GUY STINKS🦨"
+})
+
 local player = game.Players.LocalPlayer
 local backpack = player:FindFirstChildOfClass("Backpack") or player:WaitForChild("Backpack")
 
@@ -9,18 +17,72 @@ end
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
+local Invisible = false  -- Variable to track invisibility state
+local speedBoost = 50    -- Speed boost value
 
--- Function to play teleport sound
-local function playTeleportSound()
-	local sound = Instance.new("Sound")
-	sound.SoundId = "rbxassetid://619406046"
-	sound.Volume = 2
-	sound.Parent = humanoidRootPart
-	sound:Play()
-	game:GetService("Debris"):AddItem(sound, 1)
+-- Function to create particle effects when invisibility is toggled
+local function createInvisibilityEffect()
+	-- Example: create a sparkly effect when the player turns invisible
+	local particleEmitter = Instance.new("ParticleEmitter")
+	particleEmitter.Texture = "rbxassetid://299221210"  -- Placeholder particle texture
+	particleEmitter.Size = NumberSequence.new(1)
+	particleEmitter.Lifetime = NumberRange.new(0.5)
+	particleEmitter.Rate = 100
+	particleEmitter.Parent = humanoidRootPart
 end
 
--- Create Mapo Tel Tool
+-- Function to stop invisibility effects
+local function stopInvisibilityEffect()
+	for _, effect in pairs(humanoidRootPart:GetChildren()) do
+		if effect:IsA("ParticleEmitter") then
+			effect:Destroy()  -- Remove the effect when invisibility is toggled off
+		end
+	end
+end
+
+-- Create the invisibility tool
+local invisibilityTool = Instance.new("Tool")
+invisibilityTool.Name = "Phantom Shift"
+invisibilityTool.RequiresHandle = false
+invisibilityTool.Parent = backpack
+
+print("Phantom Shift Tool Created") -- Debugging
+
+local function toggleInvisibility()
+    if Invisible then
+        -- Deactivate invisibility (make the player visible again)
+        Invisible = false
+        humanoid.WalkSpeed = 16  -- Reset speed to normal
+        character.HumanoidRootPart.Transparency = 0  -- Make player visible
+        stopInvisibilityEffect()  -- Remove particle effect
+        
+        -- Reset transparency of body parts to make player visible again
+        for _, part in ipairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 0
+            end
+        end
+        print("You are now visible again.") -- Debugging
+    else
+        -- Activate invisibility
+        Invisible = true
+        humanoid.WalkSpeed = speedBoost  -- Speed boost
+        character.HumanoidRootPart.Transparency = 1  -- Make humanoidRootPart invisible
+        createInvisibilityEffect()  -- Create particle effects
+        
+        -- Set transparency of all body parts to make the player invisible
+        for _, part in ipairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Transparency = 1
+            end
+        end
+        print("You are now invisible.") -- Debugging
+    end
+end
+
+invisibilityTool.Activated:Connect(toggleInvisibility)
+
+-- Create Mapo Tel Tool (Teleport Ability)
 local mapotel = Instance.new("Tool")
 mapotel.Name = "Mapo Tel"
 mapotel.RequiresHandle = false
@@ -29,36 +91,34 @@ mapotel.Parent = backpack
 print("Mapo Tel Tool Created") -- Debugging
 
 local function mapoTel()
-	local moveDirection = humanoid.MoveDirection
-	local teleportDistance = 15  
+    local moveDirection = humanoid.MoveDirection
+    local teleportDistance = 15  
 
-	if moveDirection.Magnitude > 0 then
-		humanoidRootPart.CFrame = humanoidRootPart.CFrame + moveDirection.Unit * teleportDistance
-	else
-		local closestPlayer, closestDistance = nil, math.huge
-		for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
-			if otherPlayer ~= player and otherPlayer.Character then
-				local otherHRP = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
-				if otherHRP then
-					local distance = (humanoidRootPart.Position - otherHRP.Position).Magnitude
-					if distance < closestDistance then
-						closestDistance, closestPlayer = distance, otherPlayer
-					end
-				end
-			end
-		end
+    if moveDirection.Magnitude > 0 then
+        humanoidRootPart.CFrame = humanoidRootPart.CFrame + moveDirection.Unit * teleportDistance
+    else
+        local closestPlayer, closestDistance = nil, math.huge
+        for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+            if otherPlayer ~= player and otherPlayer.Character then
+                local otherHRP = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if otherHRP then
+                    local distance = (humanoidRootPart.Position - otherHRP.Position).Magnitude
+                    if distance < closestDistance then
+                        closestDistance, closestPlayer = distance, otherPlayer
+                    end
+                end
+            end
+        end
 
-		if closestPlayer then
-			humanoidRootPart.CFrame = closestPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
-		end
-	end
-
-	playTeleportSound()
+        if closestPlayer then
+            humanoidRootPart.CFrame = closestPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+        end
+    end
 end
 
 mapotel.Activated:Connect(mapoTel)
 
--- Create Tasn Tool
+-- Create Tasn Tool (Teleport to Random Trashcan Ability)
 local tasnTool = Instance.new("Tool")
 tasnTool.Name = "Tasn"
 tasnTool.RequiresHandle = false  
@@ -68,28 +128,23 @@ print("Tasn Tool Created") -- Debugging
 
 -- Predefined trashcan positions
 local trashcanPositions = {
-        Vector3.new(4.62967586517334, 440.5057373046875, 60.54078674316406),
-        Vector3.new(69.82223510742188, 440.5058288574219, -78.09501647949219),
-        Vector3.new(124.11994171142578, 440.50567626953125, -100.90341186523438),
-        Vector3.new(178.38943481445312, 440.5058288574219, 157.46755981445312)
+    Vector3.new(4.62967586517334, 440.5057373046875, 60.54078674316406),
+    Vector3.new(69.82223510742188, 440.5058288574219, -78.09501647949219),
+    Vector3.new(124.11994171142578, 440.50567626953125, -100.90341186523438),
+    Vector3.new(178.38943481445312, 440.5058288574219, 157.46755981445312)
 }
 
 local function tasnAbility()
-	local originalPosition = humanoidRootPart.Position
-	local randomPosition = trashcanPositions[math.random(1, #trashcanPositions)]
-	local camera = game.Workspace.CurrentCamera
-	local cameraCFrame = camera.CFrame
+    local originalPosition = humanoidRootPart.Position
+    local randomPosition = trashcanPositions[math.random(1, #trashcanPositions)]
 
-	-- Teleport to trashcan
-	humanoidRootPart.CFrame = CFrame.new(randomPosition)
-	playTeleportSound()
+    -- Teleport to trashcan
+    humanoidRootPart.CFrame = CFrame.new(randomPosition)
 
-	task.wait(1) -- Stay at trashcan for 1 second
+    task.wait(1) -- Stay at trashcan for 1 second
 
-	-- Teleport back
-	humanoidRootPart.CFrame = CFrame.new(originalPosition)
-	camera.CFrame = cameraCFrame
+    -- Teleport back
+    humanoidRootPart.CFrame = CFrame.new(originalPosition)
 end
 
 tasnTool.Activated:Connect(tasnAbility)
-
