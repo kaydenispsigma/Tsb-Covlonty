@@ -106,16 +106,58 @@ local function tasnAbility()
     -- Teleport to trashcan
     humanoidRootPart.CFrame = CFrame.new(randomPosition)
 
-game:GetService("StarterGui"):SetCore("SendNotifcation", {
-     Title = "M1"
-     Text = "do leftclick or pressed the punch button FAST"
-     Duration = 1
-})
-
-    task.wait(2) -- Stay at trashcan for 1 second
+    task.wait(1) -- Stay at trashcan for 1 second
 
     -- Teleport back
     humanoidRootPart.CFrame = CFrame.new(originalPosition)
 end
 
 tasnTool.Activated:Connect(tasnAbility)
+
+-- Function to change the ultimate bar color to red
+local function updateUltimateBarColor()
+    local screenGui = player.PlayerGui:FindFirstChild("ScreenGui")
+    if not screenGui then return end
+
+    local magicHealthFrame = screenGui:FindFirstChild("MagicHealth")
+    if not magicHealthFrame then return end
+
+    local healthFrame = magicHealthFrame:FindFirstChild("Health")
+    if not healthFrame then return end
+
+    local barFrame = healthFrame:FindFirstChild("Bar")
+    if not barFrame then return end
+
+    local imageLabel = barFrame:FindFirstChild("Bar")
+    if imageLabel and imageLabel:IsA("ImageLabel") then
+        -- Change the ultimate bar color to red
+        imageLabel.ImageColor3 = Color3.fromRGB(255, 0, 0)  -- Red color
+    end
+end
+
+-- Function to rename ultimate moves
+local function renameUltimateMoves()
+    local buttonData = {
+        {name = "1", text = "OutPage"},  -- Ultimate move name
+        {name = "2", text = "OutPage"},
+        {name = "3", text = "OutPage"},
+        {name = "4", text = "OutPage"},
+    }
+
+    for _, data in pairs(buttonData) do
+        local hotbarFrame = player.PlayerGui:FindFirstChild("Hotbar")
+        if hotbarFrame then
+            local baseButton = hotbarFrame:FindFirstChild(data.name) and hotbarFrame[data.name]:FindFirstChild("Base")
+            if baseButton then
+                local ToolName = baseButton:FindFirstChild("ToolName")
+                if ToolName then
+                    ToolName.Text = data.text
+                end
+            end
+        end
+    end
+end
+
+-- Call the functions
+renameUltimateMoves()
+updateUltimateBarColor()
