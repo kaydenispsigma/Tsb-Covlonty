@@ -6,6 +6,7 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
     Button2 = "Eugh... THIS GUY STINKS🦨"
 })
 
+-- Initial setup
 local player = game.Players.LocalPlayer
 local backpack = player:FindFirstChildOfClass("Backpack") or player:WaitForChild("Backpack")
 local character = player.Character or player.CharacterAdded:Wait()
@@ -13,10 +14,20 @@ local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 local camera = game.Workspace.CurrentCamera
 
+-- Constants and variables
 local Invisible = false
 local speedBoost = 50
 local skyHeight = 5000  -- How high the player gets teleported
 local originalCameraCF = camera.CFrame  -- Store original camera position
+
+-- Function to delete all existing tools in the backpack
+local function clearTools()
+    for _, tool in pairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            tool:Destroy()
+        end
+    end
+end
 
 -- Function to toggle invisibility
 local function toggleInvisibility()
@@ -38,83 +49,86 @@ local function toggleInvisibility()
     end
 end
 
--- Create the invisibility tool
-local invisibilityTool = Instance.new("Tool")
-invisibilityTool.Name = "Phantom Shift"
-invisibilityTool.RequiresHandle = false
-invisibilityTool.Parent = backpack
-invisibilityTool.Activated:Connect(toggleInvisibility)
+-- Function to create tools
+local function createTools()
+    -- Clear existing tools
+    clearTools()
 
-print("Phantom Shift Tool Created") -- Debugging
+    -- Invisibility Tool (Phantom Shift)
+    local invisibilityTool = Instance.new("Tool")
+    invisibilityTool.Name = "Phantom Shift"
+    invisibilityTool.RequiresHandle = false
+    invisibilityTool.Parent = backpack
+    invisibilityTool.Activated:Connect(toggleInvisibility)
+    print("Phantom Shift Tool Created") -- Debugging
 
--- Create Mapo Tel Tool (Teleport Ability)
-local mapotel = Instance.new("Tool")
-mapotel.Name = "Mapo Tel"
-mapotel.RequiresHandle = false
-mapotel.Parent = backpack  
+    -- Mapo Tel Tool (Teleport Ability)
+    local mapotel = Instance.new("Tool")
+    mapotel.Name = "Mapo Tel"
+    mapotel.RequiresHandle = false
+    mapotel.Parent = backpack  
+    print("Mapo Tel Tool Created") -- Debugging
 
-print("Mapo Tel Tool Created") -- Debugging
+    local function mapoTel()
+        local moveDirection = humanoid.MoveDirection
+        local teleportDistance = 15  
 
-local function mapoTel()
-    local moveDirection = humanoid.MoveDirection
-    local teleportDistance = 15  
-
-    if moveDirection.Magnitude > 0 then
-        humanoidRootPart.CFrame = humanoidRootPart.CFrame + moveDirection.Unit * teleportDistance
-    else
-        local closestPlayer, closestDistance = nil, math.huge
-        for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
-            if otherPlayer ~= player and otherPlayer.Character then
-                local otherHRP = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if otherHRP then
-                    local distance = (humanoidRootPart.Position - otherHRP.Position).Magnitude
-                    if distance < closestDistance then
-                        closestDistance, closestPlayer = distance, otherPlayer
+        if moveDirection.Magnitude > 0 then
+            humanoidRootPart.CFrame = humanoidRootPart.CFrame + moveDirection.Unit * teleportDistance
+        else
+            local closestPlayer, closestDistance = nil, math.huge
+            for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+                if otherPlayer ~= player and otherPlayer.Character then
+                    local otherHRP = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if otherHRP then
+                        local distance = (humanoidRootPart.Position - otherHRP.Position).Magnitude
+                        if distance < closestDistance then
+                            closestDistance, closestPlayer = distance, otherPlayer
+                        end
                     end
                 end
             end
-        end
 
-        if closestPlayer then
-            humanoidRootPart.CFrame = closestPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+            if closestPlayer then
+                humanoidRootPart.CFrame = closestPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+            end
         end
     end
+
+    mapotel.Activated:Connect(mapoTel)
+
+    -- Tasn Tool (Teleport to Random Trashcan Ability)
+    local tasnTool = Instance.new("Tool")
+    tasnTool.Name = "Tasn"
+    tasnTool.RequiresHandle = false  
+    tasnTool.Parent = backpack  
+    print("Tasn Tool Created") -- Debugging
+
+    -- Predefined trashcan positions
+    local trashcanPositions = {
+        Vector3.new(4.62967586517334, 440.5057373046875, 60.54078674316406),
+        Vector3.new(69.82223510742188, 440.5058288574219, -78.09501647949219),
+        Vector3.new(124.11994171142578, 440.50567626953125, -100.90341186523438),
+        Vector3.new(178.38943481445312, 440.5058288574219, 157.46755981445312)
+    }
+
+    local function tasnAbility()
+        local originalPosition = humanoidRootPart.Position
+        local randomPosition = trashcanPositions[math.random(1, #trashcanPositions)]
+
+        -- Teleport to trashcan
+        humanoidRootPart.CFrame = CFrame.new(randomPosition)
+
+        task.wait(1) -- Stay at trashcan for 1 second
+
+        -- Teleport back
+        humanoidRootPart.CFrame = CFrame.new(originalPosition)
+    end
+
+    tasnTool.Activated:Connect(tasnAbility)
 end
 
-mapotel.Activated:Connect(mapoTel)
-
--- Create Tasn Tool (Teleport to Random Trashcan Ability)
-local tasnTool = Instance.new("Tool")
-tasnTool.Name = "Tasn"
-tasnTool.RequiresHandle = false  
-tasnTool.Parent = backpack  
-
-print("Tasn Tool Created") -- Debugging
-
--- Predefined trashcan positions
-local trashcanPositions = {
-    Vector3.new(4.62967586517334, 440.5057373046875, 60.54078674316406),
-    Vector3.new(69.82223510742188, 440.5058288574219, -78.09501647949219),
-    Vector3.new(124.11994171142578, 440.50567626953125, -100.90341186523438),
-    Vector3.new(178.38943481445312, 440.5058288574219, 157.46755981445312)
-}
-
-local function tasnAbility()
-    local originalPosition = humanoidRootPart.Position
-    local randomPosition = trashcanPositions[math.random(1, #trashcanPositions)]
-
-    -- Teleport to trashcan
-    humanoidRootPart.CFrame = CFrame.new(randomPosition)
-
-    task.wait(1) -- Stay at trashcan for 1 second
-
-    -- Teleport back
-    humanoidRootPart.CFrame = CFrame.new(originalPosition)
-end
-
-tasnTool.Activated:Connect(tasnAbility)
-
--- Function to change the ultimate bar color to red
+-- Function to update the ultimate bar color to red
 local function updateUltimateBarColor()
     local screenGui = player.PlayerGui:FindFirstChild("ScreenGui")
     if not screenGui then return end
@@ -158,6 +172,7 @@ local function renameUltimateMoves()
     end
 end
 
--- Call the functions
-renameUltimateMoves()
-updateUltimateBarColor()
+-- Main execution
+createTools()  -- Create tools
+renameUltimateMoves()  -- Rename ultimate moves
+updateUltimateBarColor()  -- Update the ultimate bar color
