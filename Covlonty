@@ -3,7 +3,7 @@ local backpack = player:FindFirstChildOfClass("Backpack") or player:WaitForChild
 
 -- Ensure backpack exists before modifying it
 if backpack then
-    backpack:ClearAllChildren()  -- Remove existing tools
+	backpack:ClearAllChildren()  -- Remove existing tools
 end
 
 local character = player.Character or player.CharacterAdded:Wait()
@@ -12,48 +12,48 @@ local humanoid = character:WaitForChild("Humanoid")
 
 -- Function to play teleport sound
 local function playTeleportSound()
-    local sound = Instance.new("Sound")
-    sound.SoundId = "rbxassetid://619406046"
-    sound.Volume = 2
-    sound.Parent = humanoidRootPart
-    sound:Play()
-    game:GetService("Debris"):AddItem(sound, 1)
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://619406046"
+	sound.Volume = 2
+	sound.Parent = humanoidRootPart
+	sound:Play()
+	game:GetService("Debris"):AddItem(sound, 1)
 end
 
 -- Create Mapo Tel Tool
 local mapotel = Instance.new("Tool")
 mapotel.Name = "Mapo Tel"
-mapotel.RequiresHandle = false  -- Fix: Set to false so it works without a handle
-mapotel.Parent = backpack  -- Set parent after properties
+mapotel.RequiresHandle = false
+mapotel.Parent = backpack  
 
 print("Mapo Tel Tool Created") -- Debugging
 
 local function mapoTel()
-    local moveDirection = humanoid.MoveDirection
-    local teleportDistance = 15  -- Distance in studs
+	local moveDirection = humanoid.MoveDirection
+	local teleportDistance = 15  
 
-    if moveDirection.Magnitude > 0 then
-        humanoidRootPart.CFrame = humanoidRootPart.CFrame + moveDirection.Unit * teleportDistance
-    else
-        local closestPlayer, closestDistance = nil, math.huge
-        for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
-            if otherPlayer ~= player and otherPlayer.Character then
-                local otherHRP = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if otherHRP then
-                    local distance = (humanoidRootPart.Position - otherHRP.Position).Magnitude
-                    if distance < closestDistance then
-                        closestDistance, closestPlayer = distance, otherPlayer
-                    end
-                end
-            end
-        end
+	if moveDirection.Magnitude > 0 then
+		humanoidRootPart.CFrame = humanoidRootPart.CFrame + moveDirection.Unit * teleportDistance
+	else
+		local closestPlayer, closestDistance = nil, math.huge
+		for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+			if otherPlayer ~= player and otherPlayer.Character then
+				local otherHRP = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+				if otherHRP then
+					local distance = (humanoidRootPart.Position - otherHRP.Position).Magnitude
+					if distance < closestDistance then
+						closestDistance, closestPlayer = distance, otherPlayer
+					end
+				end
+			end
+		end
 
-        if closestPlayer then
-            humanoidRootPart.CFrame = closestPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
-        end
-    end
+		if closestPlayer then
+			humanoidRootPart.CFrame = closestPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+		end
+	end
 
-    playTeleportSound()
+	playTeleportSound()
 end
 
 mapotel.Activated:Connect(mapoTel)
@@ -61,33 +61,40 @@ mapotel.Activated:Connect(mapoTel)
 -- Create Tasn Tool
 local tasnTool = Instance.new("Tool")
 tasnTool.Name = "Tasn"
-tasnTool.RequiresHandle = false  -- Fix: Set to false so it works without a handle
-tasnTool.Parent = backpack  -- Set parent after properties
+tasnTool.RequiresHandle = false  
+tasnTool.Parent = backpack  
 
 print("Tasn Tool Created") -- Debugging
 
 -- Predefined trashcan positions
 local trashcanPositions = {
-    Vector3.new(0.057, 440.506, 53.435),
-    Vector3.new(123.12, 440.506, 183.405),
-    Vector3.new(171.183, 440.506, 159.728),
+	Vector3.new(0.057, 440.506, 53.435),
+	Vector3.new(123.12, 440.506, 183.405),
+	Vector3.new(171.183, 440.506, 159.728),
 }
 
 local function tasnAbility()
-    local originalPosition = humanoidRootPart.Position
-    local randomPosition = trashcanPositions[math.random(1, #trashcanPositions)]
-    local camera = game.Workspace.CurrentCamera
-    local cameraCFrame = camera.CFrame
+	local originalPosition = humanoidRootPart.Position
+	local randomPosition = trashcanPositions[math.random(1, #trashcanPositions)]
+	local camera = game.Workspace.CurrentCamera
+	local cameraCFrame = camera.CFrame
 
-    -- Teleport to trashcan
-    humanoidRootPart.CFrame = CFrame.new(randomPosition)
-    playTeleportSound()
+	-- Teleport to trashcan
+	humanoidRootPart.CFrame = CFrame.new(randomPosition)
+	playTeleportSound()
 
-    task.wait(1) -- Stay at trashcan for 1 second
+	task.wait(1) -- Stay at trashcan for 1 second
 
-    -- Teleport back
-    humanoidRootPart.CFrame = CFrame.new(originalPosition)
-    camera.CFrame = cameraCFrame
+	-- Teleport back
+	humanoidRootPart.CFrame = CFrame.new(originalPosition)
+	camera.CFrame = cameraCFrame
 end
+
+local userInputService = game:GetService("UserInputService")
+
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+	input.UserInputType =  Enum.UserInputType.MouseButton1
+end)
+
 
 tasnTool.Activated:Connect(tasnAbility)
