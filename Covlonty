@@ -1,24 +1,16 @@
--- Remove existing tools from the player's backpack
-task.wait(1)
-for _, obj in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-    if obj:IsA("Tool") then
-        obj:Destroy()
-    end
+local player = game.Players.LocalPlayer
+local backpack = player:FindFirstChildOfClass("Backpack") or player:WaitForChild("Backpack")
+
+-- Ensure backpack exists before modifying it
+if backpack then
+    backpack:ClearAllChildren()  -- Remove existing tools
 end
 
--- Create Mapo Tel Tool
-local mapoTelTool = Instance.new("Tool")
-mapoTelTool.Name = "Mapo Tel"
-mapoTelTool.RequiresHandle = false
-mapoTelTool.Parent = game.Players.LocalPlayer.Backpack
-mapoTelTool.TextureId = "rbxassetid://101984471215603"  -- Tool icon using the decal ID
-
-local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local humanoid = character:WaitForChild("Humanoid")
 
--- Play Teleport Sound for both abilities
+-- Function to play teleport sound
 local function playTeleportSound()
     local sound = Instance.new("Sound")
     sound.SoundId = "rbxassetid://619406046"
@@ -28,84 +20,74 @@ local function playTeleportSound()
     game:GetService("Debris"):AddItem(sound, 1)
 end
 
--- Mapo Tel Ability (Teleport based on Movement or Closest Player)
+-- Create Mapo Tel Tool
+local mapotel = Instance.new("Tool")
+mapotel.Name = "Mapo Tel"
+mapotel.RequiresHandle = false  -- Fix: Set to false so it works without a handle
+mapotel.Parent = backpack  -- Set parent after properties
+
+print("Mapo Tel Tool Created") -- Debugging
+
 local function mapoTel()
     local moveDirection = humanoid.MoveDirection
-    local teleportDistance = 15  -- Set the teleport distance to 15 studs
+    local teleportDistance = 15  -- Distance in studs
 
-    -- If the player is moving, teleport in the direction they're moving
     if moveDirection.Magnitude > 0 then
-        humanoidRootPart.CFrame = CFrame.new(humanoidRootPart.Position + moveDirection.Unit * teleportDistance)
+        humanoidRootPart.CFrame = humanoidRootPart.CFrame + moveDirection.Unit * teleportDistance
     else
-        -- If the player isn't moving, teleport to the closest player
-        local closestPlayer = nil
-        local closestDistance = math.huge
-
-        for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-            if otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local distance = (humanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).Magnitude
-                if distance < closestDistance then
-                    closestDistance = distance
-                    closestPlayer = otherPlayer
+        local closestPlayer, closestDistance = nil, math.huge
+        for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+            if otherPlayer ~= player and otherPlayer.Character then
+                local otherHRP = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if otherHRP then
+                    local distance = (humanoidRootPart.Position - otherHRP.Position).Magnitude
+                    if distance < closestDistance then
+                        closestDistance, closestPlayer = distance, otherPlayer
+                    end
                 end
             end
         end
 
-        -- Teleport to the closest player if found
         if closestPlayer then
-            humanoidRootPart.CFrame = CFrame.new(closestPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0))
+            humanoidRootPart.CFrame = closestPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
         end
     end
 
-    -- Play teleport sound
     playTeleportSound()
 end
 
-mapoTelTool.Activated:Connect(mapoTel)
-
+mapotel.Activated:Connect(mapoTel)
 
 -- Create Tasn Tool
 local tasnTool = Instance.new("Tool")
 tasnTool.Name = "Tasn"
-tasnTool.RequiresHandle = false
-tasnTool.Parent = game.Players.LocalPlayer.Backpack
-tasnTool.TextureId = "rbxassetid://101984471215603"  -- Tool icon using the decal ID
+tasnTool.RequiresHandle = false  -- Fix: Set to false so it works without a handle
+tasnTool.Parent = backpack  -- Set parent after properties
+
+print("Tasn Tool Created") -- Debugging
 
 -- Predefined trashcan positions
 local trashcanPositions = {
-    Vector3.new(0.05725383758544922, 440.50567626953125, 53.435123443603516),
-    Vector3.new(123.11996459960938, 440.505859375, 183.40464782714844),
-    Vector3.new(171.1833435058594, 440.505859375, 159.72816467285156),
+    Vector3.new(0.057, 440.506, 53.435),
+    Vector3.new(123.12, 440.506, 183.405),
+    Vector3.new(171.183, 440.506, 159.728),
 }
 
--- Tasn Ability (Teleport to Trashcan, Perform Left-Click, and Return)
-local function tasn()
-    -- Store the original position before teleporting
+local function tasnAbility()
     local originalPosition = humanoidRootPart.Position
-
-    -- Pick a random trashcan position
     local randomPosition = trashcanPositions[math.random(1, #trashcanPositions)]
-
-    -- Save the current camera position before teleporting
     local camera = game.Workspace.CurrentCamera
     local cameraCFrame = camera.CFrame
 
-    -- Teleport to the trashcan
+    -- Teleport to trashcan
     humanoidRootPart.CFrame = CFrame.new(randomPosition)
     playTeleportSound()
 
-    -- Simulate left-click (M1)
-    local virtualUser = game:GetService("VirtualUser")
-    virtualUser:Button1Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)  -- Left-click action after teleport
+    task.wait(1) -- Stay at trashcan for 1 second
 
-    -- Wait for a moment before teleporting back
-    task.wait(1)
-
-    -- Teleport back to the original position
+    -- Teleport back
     humanoidRootPart.CFrame = CFrame.new(originalPosition)
-
-    -- Restore camera position
     camera.CFrame = cameraCFrame
 end
 
-tasnTool.Activated:Connect(tasn)
+tasnTool.Activated:Connect(tasnAbility)
