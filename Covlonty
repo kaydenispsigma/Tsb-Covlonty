@@ -123,8 +123,8 @@ local function tasnAbility()
     humanoidRootPart.CFrame = CFrame.new(randomPosition)
 
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "M1"
-    Text = "PUNCH NOW LEFT CLICK NOW"
+    Title = "M1",
+    Text = "PUNCH NOW LEFT CLICK NOW",
     Duration = 1
 })
 
